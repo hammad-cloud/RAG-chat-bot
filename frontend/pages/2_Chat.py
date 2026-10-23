@@ -36,7 +36,7 @@ if prompt:
                 response = api_client.ask_question(prompt)
                 answer = response.get(
                     "answer",
-                    "Mujhe provided documents mein is question ka relevant answer nahi mila.",
+                    "I could not find a relevant answer to this question in the provided documents.",
                 )
                 source_text = format_sources(response)
             except Exception as exc:
