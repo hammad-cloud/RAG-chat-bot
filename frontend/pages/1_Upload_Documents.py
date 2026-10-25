@@ -12,7 +12,7 @@ apply_page_config(page_title="Upload Documents")
 render_sidebar()
 
 st.title("Upload Documents")
-st.markdown("Upload PDF, DOC/DOCX, or TXT files to build the knowledge base.")
+st.markdown("Upload PDF, DOCX, or TXT files to build the knowledge base.")
 
 uploaded_files = st.file_uploader(
     "Select documents",
@@ -52,3 +52,29 @@ if st.button("Upload & Process", type="primary", disabled=not uploaded_files):
 
         status.empty()
         st.info("Documents are extracted, chunked, embedded, and stored in the knowledge base.")
+
+st.divider()
+st.subheader("Knowledge base")
+
+try:
+    documents = api_client.list_documents()
+except Exception as exc:
+    st.error(f"Could not load documents: {exc}")
+    documents = []
+
+if not documents:
+    st.caption("No documents yet.")
+
+for document in documents:
+    name_col, meta_col, action_col = st.columns([5, 3, 1])
+    name_col.markdown(f"**{document['filename']}**")
+    meta_col.caption(
+        f"{document['chunk_count']} chunks · uploaded {document['uploaded_at'][:16].replace('T', ' ')} UTC"
+    )
+    if action_col.button("Delete", key=f"delete_{document['document_id']}"):
+        try:
+            api_client.delete_document(document["document_id"])
+        except Exception as exc:
+            st.error(f"Failed to delete `{document['filename']}`: {exc}")
+        else:
+            st.rerun()

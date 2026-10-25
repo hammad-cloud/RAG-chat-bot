@@ -30,8 +30,21 @@ class ApiClient:
             files=files,
             timeout=self.timeout,
         )
-        response.raise_for_status()
+        _raise_for_detail(response)
         return response.json()
+
+    def list_documents(self) -> list[dict[str, Any]]:
+        """List documents in the knowledge base, newest first."""
+        response = requests.get(f"{self.base_url}/documents", timeout=self.timeout)
+        _raise_for_detail(response)
+        return response.json()
+
+    def delete_document(self, document_id: str) -> None:
+        """Remove a document from the knowledge base."""
+        response = requests.delete(
+            f"{self.base_url}/documents/{document_id}", timeout=self.timeout
+        )
+        _raise_for_detail(response)
 
     def ask_question(self, question: str) -> dict[str, Any]:
         """Send a chat question to the backend RAG endpoint."""
@@ -41,14 +54,19 @@ class ApiClient:
             json=payload,
             timeout=self.timeout,
         )
-        if not response.ok:
-            detail = None
-            try:
-                detail = response.json().get("detail")
-            except Exception:
-                detail = response.text
-            raise RuntimeError(detail or f"Chat request failed ({response.status_code})")
+        _raise_for_detail(response)
         return response.json()
+
+
+def _raise_for_detail(response: requests.Response) -> None:
+    """Raise with the backend's error message instead of a bare HTTP status."""
+    if response.ok:
+        return
+    try:
+        detail = response.json().get("detail")
+    except Exception:
+        detail = response.text
+    raise RuntimeError(detail or f"Request failed ({response.status_code})")
 
 
 api_client = ApiClient()

@@ -21,7 +21,7 @@ def main() -> None:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.info("**1. Upload**\n\nAdd PDF, DOC/DOCX, or TXT files.")
+        st.info("**1. Upload**\n\nAdd PDF, DOCX, or TXT files.")
     with col2:
         st.info("**2. Process**\n\nDocuments are chunked and indexed.")
     with col3:
