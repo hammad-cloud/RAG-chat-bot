@@ -1,5 +1,7 @@
 # RAG Chatbot
 
+[![CI](https://github.com/hammad-cloud/RAG-chat-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/hammad-cloud/RAG-chat-bot/actions/workflows/ci.yml)
+
 Ask questions in plain language about your own documents. Upload PDF, DOCX or TXT files, and the chatbot answers using only what those documents say, with the source document and page for every answer.
 
 Built with **FastAPI**, **ChromaDB**, **Streamlit** and **Google Gemini** (or **OpenAI**).
@@ -20,7 +22,8 @@ Question ──► Similarity search (top 4) ──► Context + question ──
 
 ## Features
 
-- Upload PDF, DOCX and TXT documents
+- Upload PDF, DOCX and TXT documents (up to 20 MB each)
+- List and delete documents in the knowledge base
 - Grounded answers with source document and page number
 - Switch between Gemini and OpenAI with one setting
 - Automatic fallback through newer Gemini Flash models if the configured one is unavailable
@@ -46,7 +49,7 @@ RAG-chat-bot/
 │   │   ├── main.py              # App entry point, CORS, routers
 │   │   ├── api/routes/
 │   │   │   ├── chat.py          # POST /chat/ask
-│   │   │   ├── documents.py     # POST /documents/upload
+│   │   │   ├── documents.py     # Upload, list and delete documents
 │   │   │   └── health.py        # GET /health
 │   │   ├── core/
 │   │   │   ├── config.py        # Settings loaded from .env
@@ -65,7 +68,9 @@ RAG-chat-bot/
 │   │       └── dependencies.py      # Shared service instances
 │   ├── data/                    # ChromaDB storage (created at runtime)
 │   ├── uploads/                 # Uploaded files
+│   ├── tests/                   # pytest suite
 │   ├── requirements.txt
+│   ├── requirements-dev.txt     # + pytest, ruff
 │   └── .env.example
 ├── frontend/                    # Streamlit app
 │   ├── Home.py                  # Landing page
@@ -78,6 +83,8 @@ RAG-chat-bot/
 │   ├── utils/helpers.py
 │   ├── requirements.txt
 │   └── .env.example
+├── .github/workflows/ci.yml     # Lint + tests on every push
+├── ruff.toml                    # Lint rules
 └── README.md
 ```
 
@@ -122,6 +129,8 @@ Open http://localhost:8501, upload a document on **Upload Documents**, then ask 
 |--------|----------|-------------|
 | GET | `/health` | Service status |
 | POST | `/documents/upload` | Upload a PDF, DOCX or TXT file (multipart `file`) |
+| GET | `/documents` | List indexed documents, newest first |
+| DELETE | `/documents/{id}` | Remove a document and its chunks |
 | POST | `/chat/ask` | `{"question": "..."}` → answer and sources |
 
 ## Configuration
@@ -136,8 +145,20 @@ All settings live in `backend/.env`:
 | `CHUNK_SIZE` / `CHUNK_OVERLAP` | `900` / `150` | Chunk length and overlap (characters) |
 | `RETRIEVAL_TOP_K` | `4` | Chunks sent to the LLM |
 | `MIN_SIMILARITY_SCORE` | `0.05` | Minimum similarity for a chunk to count as relevant |
+| `MAX_UPLOAD_MB` | `20` | Largest accepted upload |
 
 Never commit your `.env` files.
+
+## Development
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest -q            # tests use a temporary ChromaDB, no API key needed
+ruff check ..        # lint backend and frontend
+```
+
+CI runs the same lint and tests on every push.
 
 ## Author
 
