@@ -68,7 +68,7 @@ class VectorStoreService:
         distances = (result.get("distances") or [[]])[0]
 
         retrieved: list[RetrievedChunk] = []
-        for content, metadata, distance in zip(documents, metadatas, distances):
+        for content, metadata, distance in zip(documents, metadatas, distances, strict=True):
             # Cosine distance -> similarity score approximation
             score = 1 - float(distance)
             page_number = metadata.get("page_number")

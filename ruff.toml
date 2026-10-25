@@ -1,0 +1,12 @@
+target-version = "py310"
+line-length = 110
+
+[lint]
+select = ["E", "F", "I", "B"]
+
+[lint.isort]
+known-first-party = ["app", "components", "config", "services", "utils"]
+
+[lint.flake8-bugbear]
+# FastAPI declares params via File()/Depends() defaults.
+extend-immutable-calls = ["fastapi.File"]
