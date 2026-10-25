@@ -30,9 +30,6 @@ class DocumentService:
         document_id = str(uuid4())
         uploaded_at = datetime.now(timezone.utc).isoformat()
 
-        saved_path = settings.upload_dir / f"{document_id}_{safe_name}"
-        saved_path.write_bytes(content)
-
         extractor = get_extractor(safe_name)
         extracted = extractor.extract(safe_name, content)
         if not extracted.text.strip():
@@ -48,6 +45,8 @@ class DocumentService:
             chunks=chunks,
             uploaded_at=uploaded_at,
         )
+        # Saved only after indexing succeeds, so rejected files leave nothing behind.
+        (settings.upload_dir / f"{document_id}_{safe_name}").write_bytes(content)
 
         return StoredDocument(
             document_id=document_id,

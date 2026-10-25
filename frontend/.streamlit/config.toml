@@ -8,6 +8,7 @@ font = "sans serif"
 [server]
 headless = true
 port = 8501
+maxUploadSize = 20  # MB, matches MAX_UPLOAD_MB on the backend
 enableCORS = false
 enableXsrfProtection = true
 

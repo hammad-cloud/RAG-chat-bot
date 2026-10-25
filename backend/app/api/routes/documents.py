@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
+from app.core.config import settings
 from app.models.schemas import DocumentUploadResponse
 from app.processing.extractors.factory import UnsupportedFileTypeError
 from app.services.dependencies import get_document_service
@@ -16,7 +17,13 @@ async def upload_document(file: UploadFile = File(...)) -> DocumentUploadRespons
     if not file.filename:
         raise HTTPException(status_code=400, detail="Filename is required.")
 
-    content = await file.read()
+    max_bytes = settings.max_upload_mb * 1024 * 1024
+    content = await file.read(max_bytes + 1)
+    if len(content) > max_bytes:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File is larger than {settings.max_upload_mb} MB.",
+        )
     if not content:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 

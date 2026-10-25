@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     upload_dir: Path = BASE_DIR / "uploads"
     chroma_dir: Path = BASE_DIR / "data" / "chroma"
     collection_name: str = "company_documents"
+    max_upload_mb: int = 20
 
     chunk_size: int = 900
     chunk_overlap: int = 150
