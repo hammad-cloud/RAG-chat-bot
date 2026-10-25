@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.core.config import settings
@@ -9,6 +11,7 @@ from app.models.schemas import DocumentInfo, DocumentUploadResponse
 from app.processing.extractors.factory import UnsupportedFileTypeError
 from app.services.dependencies import get_document_service
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -36,10 +39,8 @@ async def upload_document(file: UploadFile = File(...)) -> DocumentUploadRespons
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to process document: {exc}",
-        ) from exc
+        logger.exception("Unexpected error in documents route")
+        raise HTTPException(status_code=500, detail="Failed to process document.") from exc
 
     return DocumentUploadResponse(
         document_id=stored.document_id,
