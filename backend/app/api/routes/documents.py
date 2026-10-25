@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.core.config import settings
-from app.models.schemas import DocumentUploadResponse
+from app.models.schemas import DocumentInfo, DocumentUploadResponse
 from app.processing.extractors.factory import UnsupportedFileTypeError
 from app.services.dependencies import get_document_service
 
@@ -47,3 +47,22 @@ async def upload_document(file: UploadFile = File(...)) -> DocumentUploadRespons
         chunk_count=stored.chunk_count,
         uploaded_at=stored.uploaded_at,
     )
+
+
+@router.get("", response_model=list[DocumentInfo])
+def list_documents() -> list[DocumentInfo]:
+    return [
+        DocumentInfo(
+            document_id=doc.document_id,
+            filename=doc.filename,
+            chunk_count=doc.chunk_count,
+            uploaded_at=doc.uploaded_at,
+        )
+        for doc in get_document_service().list_documents()
+    ]
+
+
+@router.delete("/{document_id}", status_code=204)
+def delete_document(document_id: str) -> None:
+    if not get_document_service().delete_document(document_id):
+        raise HTTPException(status_code=404, detail="Document not found.")

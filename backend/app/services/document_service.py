@@ -54,3 +54,13 @@ class DocumentService:
             chunk_count=chunk_count,
             uploaded_at=uploaded_at,
         )
+
+    def list_documents(self) -> list[StoredDocument]:
+        return self.vector_store.list_documents()
+
+    def delete_document(self, document_id: str) -> bool:
+        """Remove a document from the index and disk. False if it did not exist."""
+        removed = self.vector_store.delete_by_document_id(document_id)
+        for path in settings.upload_dir.glob(f"{document_id}_*"):
+            path.unlink(missing_ok=True)
+        return removed > 0

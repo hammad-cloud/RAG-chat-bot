@@ -9,7 +9,7 @@ import chromadb
 from chromadb.utils import embedding_functions
 
 from app.core.config import settings
-from app.models.domain import RetrievedChunk, TextChunk
+from app.models.domain import RetrievedChunk, StoredDocument, TextChunk
 
 
 class VectorStoreService:
@@ -84,5 +84,24 @@ class VectorStoreService:
             )
         return retrieved
 
-    def delete_by_document_id(self, document_id: str) -> None:
-        self._collection.delete(where={"document_id": document_id})
+    def list_documents(self) -> list[StoredDocument]:
+        """One entry per uploaded document, newest first."""
+        documents: dict[str, StoredDocument] = {}
+        for metadata in self._collection.get(include=["metadatas"])["metadatas"] or []:
+            document_id = str(metadata.get("document_id", ""))
+            if document_id not in documents:
+                documents[document_id] = StoredDocument(
+                    document_id=document_id,
+                    filename=str(metadata.get("document_name", "Unknown")),
+                    chunk_count=0,
+                    uploaded_at=str(metadata.get("uploaded_at", "")),
+                )
+            documents[document_id].chunk_count += 1
+        return sorted(documents.values(), key=lambda d: d.uploaded_at, reverse=True)
+
+    def delete_by_document_id(self, document_id: str) -> int:
+        """Delete a document's chunks and return how many were removed."""
+        ids = self._collection.get(where={"document_id": document_id}, include=[])["ids"]
+        if ids:
+            self._collection.delete(ids=ids)
+        return len(ids)

@@ -21,6 +21,13 @@ class AskResponse(BaseModel):
     sources: list[SourceInfo] = Field(default_factory=list)
 
 
+class DocumentInfo(BaseModel):
+    document_id: str
+    filename: str
+    chunk_count: int
+    uploaded_at: str
+
+
 class DocumentUploadResponse(BaseModel):
     document_id: str
     filename: str
