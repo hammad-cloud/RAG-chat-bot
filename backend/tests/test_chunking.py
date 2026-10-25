@@ -1,3 +1,5 @@
+import pytest
+
 from app.models.domain import ExtractedDocument
 from app.processing.chunking import chunk_document, clean_text
 
@@ -35,3 +37,15 @@ def test_falls_back_to_full_text_without_pages():
     chunks = chunk_document(doc, chunk_size=100, overlap=10)
     assert chunks[0].content == "body"
     assert chunks[0].page_number is None
+
+
+def test_zero_overlap_is_respected():
+    doc = ExtractedDocument(filename="a.txt", text="x" * 200, pages=[(1, "x" * 200)])
+    chunks = chunk_document(doc, chunk_size=100, overlap=0)
+    assert [len(c.content) for c in chunks] == [100, 100]
+
+
+def test_overlap_not_smaller_than_size_is_rejected():
+    doc = ExtractedDocument(filename="a.txt", text="x" * 200, pages=[(1, "x" * 200)])
+    with pytest.raises(ValueError):
+        chunk_document(doc, chunk_size=100, overlap=100)

@@ -22,7 +22,12 @@ def chunk_document(
 ) -> list[TextChunk]:
     """Split extracted pages into overlapping text chunks."""
     size = chunk_size or settings.chunk_size
-    overlap_size = overlap or settings.chunk_overlap
+    overlap_size = settings.chunk_overlap if overlap is None else overlap
+    if not 0 <= overlap_size < size:
+        # Otherwise the window never advances and the loop below never ends.
+        raise ValueError(
+            f"Chunk overlap ({overlap_size}) must be between 0 and chunk size ({size})."
+        )
     chunks: list[TextChunk] = []
     chunk_index = 0
 
