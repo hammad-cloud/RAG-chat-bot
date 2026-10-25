@@ -31,7 +31,12 @@ class DocumentService:
         uploaded_at = datetime.now(timezone.utc).isoformat()
 
         extractor = get_extractor(safe_name)
-        extracted = extractor.extract(safe_name, content)
+        try:
+            extracted = extractor.extract(safe_name, content)
+        except Exception as exc:
+            raise ValueError(
+                f"Could not read '{safe_name}'. The file may be corrupted or password-protected."
+            ) from exc
         if not extracted.text.strip():
             raise ValueError("No readable text found in the uploaded document.")
 

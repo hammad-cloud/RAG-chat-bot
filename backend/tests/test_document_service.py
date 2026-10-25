@@ -38,3 +38,9 @@ def test_rejected_upload_leaves_no_file():
 def test_path_in_filename_is_stripped():
     stored = DocumentService(vector_store=FakeStore()).process_upload("../../evil.txt", b"x")
     assert stored.filename == "evil.txt"
+
+
+@pytest.mark.parametrize("name", ["broken.pdf", "broken.docx"])
+def test_corrupt_file_is_a_clear_value_error(name):
+    with pytest.raises(ValueError, match="corrupted"):
+        DocumentService(vector_store=FakeStore()).process_upload(name, b"not a real file")
