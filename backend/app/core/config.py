@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -36,6 +38,17 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-3.5-flash"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
+
+    # Credential redaction for retrieved text, answers, errors and logs.
+    redact_secrets: bool = True
+    secret_patterns: list[str] = []  # extra regexes, e.g. SECRET_PATTERNS=["EMP-\d{6}"]
+
+    @field_validator("secret_patterns")
+    @classmethod
+    def _valid_patterns(cls, patterns: list[str]) -> list[str]:
+        for pattern in patterns:
+            re.compile(pattern)  # fail at startup, not mid-request
+        return patterns
 
 
 settings = Settings()

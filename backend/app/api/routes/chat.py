@@ -6,6 +6,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
+from app.core.redaction import redact
 from app.models.schemas import AskRequest, AskResponse
 from app.services.dependencies import get_chat_service
 
@@ -19,9 +20,9 @@ def ask_question(payload: AskRequest) -> AskResponse:
     try:
         return service.ask(payload.question)
     except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        raise HTTPException(status_code=503, detail=redact(str(exc))) from exc
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(status_code=400, detail=redact(str(exc))) from exc
     except Exception as exc:
         logger.exception("Unexpected error in chat route")
         raise HTTPException(status_code=500, detail="Failed to generate answer.") from exc

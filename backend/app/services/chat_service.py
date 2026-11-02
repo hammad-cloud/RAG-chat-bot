@@ -6,6 +6,7 @@ from html import escape
 
 from app.core.config import settings
 from app.core.constants import UNKNOWN_ANSWER
+from app.core.redaction import redact
 from app.models.domain import RetrievedChunk
 from app.models.schemas import AskResponse, SourceInfo
 from app.services.llm_service import LLMService, strip_delimiters
@@ -41,7 +42,7 @@ class ChatService:
         context = self._build_context(relevant)
         if not context:
             return AskResponse(answer=UNKNOWN_ANSWER, source=None, sources=[])
-        answer = self.llm_service.generate_answer(cleaned_question, context)
+        answer = redact(self.llm_service.generate_answer(cleaned_question, context))
         sources = self._to_sources(relevant)
 
         return AskResponse(
@@ -55,7 +56,8 @@ class ChatService:
         """Wrap each untrusted chunk in its own <document> block."""
         blocks: list[str] = []
         for chunk in chunks:
-            content = strip_delimiters(chunk.content or "").strip()
+            # Credentials in documents never reach the LLM.
+            content = redact(strip_delimiters(chunk.content or "")).strip()
             if not content:
                 continue
             # Filenames are user-controlled too: strip tags, then escape for the attribute.

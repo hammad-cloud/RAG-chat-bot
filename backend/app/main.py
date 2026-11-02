@@ -7,6 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import chat, documents, health
 from app.core.config import settings
+from app.core.redaction import install_log_redaction
+
+install_log_redaction()
 
 app = FastAPI(
     title=settings.app_name,
