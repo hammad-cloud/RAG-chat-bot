@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from html import escape
+
 from app.core.config import settings
 from app.core.constants import UNKNOWN_ANSWER
 from app.models.domain import RetrievedChunk
 from app.models.schemas import AskResponse, SourceInfo
-from app.services.llm_service import LLMService
+from app.services.llm_service import LLMService, strip_delimiters
 from app.services.vector_store import VectorStoreService
 
 
@@ -37,6 +39,8 @@ class ChatService:
         ] or retrieved
 
         context = self._build_context(relevant)
+        if not context:
+            return AskResponse(answer=UNKNOWN_ANSWER, source=None, sources=[])
         answer = self.llm_service.generate_answer(cleaned_question, context)
         sources = self._to_sources(relevant)
 
@@ -48,15 +52,18 @@ class ChatService:
 
     @staticmethod
     def _build_context(chunks: list[RetrievedChunk]) -> str:
+        """Wrap each untrusted chunk in its own <document> block."""
         blocks: list[str] = []
-        for index, chunk in enumerate(chunks, start=1):
-            page = (
-                f"Page {chunk.page_number}"
-                if chunk.page_number is not None
-                else "Page n/a"
-            )
+        for chunk in chunks:
+            content = strip_delimiters(chunk.content or "").strip()
+            if not content:
+                continue
+            # Filenames are user-controlled too: strip tags, then escape for the attribute.
+            name = escape(strip_delimiters(chunk.document_name or "Unknown"), quote=True)
+            page = chunk.page_number if chunk.page_number is not None else "n/a"
             blocks.append(
-                f"[{index}] Document: {chunk.document_name} | {page}\n{chunk.content}"
+                f'<document index="{len(blocks) + 1}" name="{name}" page="{page}">\n'
+                f"{content}\n</document>"
             )
         return "\n\n".join(blocks)
 

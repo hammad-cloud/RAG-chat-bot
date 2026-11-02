@@ -56,7 +56,7 @@ def test_upload_list_ask_delete_flow(monkeypatch):
     assert {"document_id": doc_id, "filename": "handbook.txt", "chunk_count": 1}.items() <= listed[0].items()
 
     answer = client.post("/chat/ask", json={"question": "When does the office open?"}).json()
-    assert answer["answer"].startswith("answer from: [1] Document: handbook.txt")
+    assert answer["answer"].startswith('answer from: <document index="1" name="handbook.txt"')
     assert answer["source"]["document_id"] == doc_id
 
     assert client.delete(f"/documents/{doc_id}").status_code == 204
