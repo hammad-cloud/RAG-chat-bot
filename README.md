@@ -146,8 +146,19 @@ All settings live in `backend/.env`:
 | `RETRIEVAL_TOP_K` | `4` | Chunks sent to the LLM |
 | `MIN_SIMILARITY_SCORE` | `0.05` | Minimum similarity for a chunk to count as relevant |
 | `MAX_UPLOAD_MB` | `20` | Largest accepted upload |
+| `REDACT_SECRETS` | `true` | Redact credentials in retrieved text, answers, errors and logs |
+| `SECRET_PATTERNS` | `[]` | Extra regexes to redact, as a JSON list, e.g. `["EMP-\d{6}"]` |
 
-Never commit your `.env` files.
+Never commit your `.env` files. API keys stay on the backend; the frontend only knows `BACKEND_API_URL`.
+
+### Credential redaction
+
+`backend/app/core/redaction.py` replaces likely credentials with `[REDACTED:<rule>]` before
+document text reaches the LLM, before answers and error messages reach the user, and in every
+log line. It matches the backend's own configured keys exactly, known token formats (Google,
+OpenAI, AWS, GitHub, Slack, Stripe, JWT, private keys, bearer tokens, `user:pass@` URLs), and
+`password: …` / `API_KEY=…` assignments whose value is 8+ characters with a digit, so prose like
+"the password policy requires 12 characters" is left alone.
 
 ## Development
 
