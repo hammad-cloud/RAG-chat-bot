@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import logging
+from uuid import UUID
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
+from app.core.auth import get_current_user
 from app.core.config import settings
 from app.core.redaction import redact
 from app.models.schemas import DocumentInfo, DocumentUploadResponse
@@ -17,7 +19,9 @@ router = APIRouter()
 
 
 @router.post("/upload", response_model=DocumentUploadResponse)
-async def upload_document(file: UploadFile = File(...)) -> DocumentUploadResponse:
+async def upload_document(
+    file: UploadFile = File(...), user_id: str = Depends(get_current_user)
+) -> DocumentUploadResponse:
     if not file.filename:
         raise HTTPException(status_code=400, detail="Filename is required.")
 
@@ -34,7 +38,7 @@ async def upload_document(file: UploadFile = File(...)) -> DocumentUploadRespons
     service = get_document_service()
 
     try:
-        stored = service.process_upload(file.filename, content)
+        stored = service.process_upload(file.filename, content, owner_id=user_id)
     except UnsupportedFileTypeError as exc:
         raise HTTPException(status_code=400, detail=redact(str(exc))) from exc
     except ValueError as exc:
@@ -52,7 +56,7 @@ async def upload_document(file: UploadFile = File(...)) -> DocumentUploadRespons
 
 
 @router.get("", response_model=list[DocumentInfo])
-def list_documents() -> list[DocumentInfo]:
+def list_documents(user_id: str = Depends(get_current_user)) -> list[DocumentInfo]:
     return [
         DocumentInfo(
             document_id=doc.document_id,
@@ -60,11 +64,12 @@ def list_documents() -> list[DocumentInfo]:
             chunk_count=doc.chunk_count,
             uploaded_at=doc.uploaded_at,
         )
-        for doc in get_document_service().list_documents()
+        for doc in get_document_service().list_documents(owner_id=user_id)
     ]
 
 
 @router.delete("/{document_id}", status_code=204)
-def delete_document(document_id: str) -> None:
-    if not get_document_service().delete_document(document_id):
+def delete_document(document_id: UUID, user_id: str = Depends(get_current_user)) -> None:
+    # UUID-only ids block glob/wildcard tricks; someone else's id looks the same as a missing one.
+    if not get_document_service().delete_document(str(document_id), owner_id=user_id):
         raise HTTPException(status_code=404, detail="Document not found.")

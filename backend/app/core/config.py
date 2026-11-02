@@ -43,6 +43,21 @@ class Settings(BaseSettings):
     redact_secrets: bool = True
     secret_patterns: list[str] = []  # extra regexes, e.g. SECRET_PATTERNS=["EMP-\d{6}"]
 
+    # Access tokens: {"<sha256 hex of token>": "<user_id>"}. Empty rejects every request.
+    # Only hashes are stored, so a leaked .env does not leak usable tokens.
+    auth_tokens: dict[str, str] = {}
+
+    @field_validator("auth_tokens")
+    @classmethod
+    def _valid_tokens(cls, tokens: dict[str, str]) -> dict[str, str]:
+        for digest, user_id in tokens.items():
+            if not re.fullmatch(r"[0-9a-f]{64}", digest):
+                raise ValueError("AUTH_TOKENS keys must be SHA-256 hex digests of tokens.")
+            # user_id becomes a directory name, so keep it path-safe.
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", user_id):
+                raise ValueError(f"Invalid user id in AUTH_TOKENS: {user_id!r}")
+        return tokens
+
     @field_validator("secret_patterns")
     @classmethod
     def _valid_patterns(cls, patterns: list[str]) -> list[str]:

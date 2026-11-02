@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import requests
+import streamlit as st
 
 from config.settings import settings
 
@@ -28,6 +29,7 @@ class ApiClient:
         response = requests.post(
             f"{self.base_url}/documents/upload",
             files=files,
+            headers=_auth_headers(),
             timeout=self.timeout,
         )
         _raise_for_detail(response)
@@ -35,14 +37,18 @@ class ApiClient:
 
     def list_documents(self) -> list[dict[str, Any]]:
         """List documents in the knowledge base, newest first."""
-        response = requests.get(f"{self.base_url}/documents", timeout=self.timeout)
+        response = requests.get(
+            f"{self.base_url}/documents", headers=_auth_headers(), timeout=self.timeout
+        )
         _raise_for_detail(response)
         return response.json()
 
     def delete_document(self, document_id: str) -> None:
         """Remove a document from the knowledge base."""
         response = requests.delete(
-            f"{self.base_url}/documents/{document_id}", timeout=self.timeout
+            f"{self.base_url}/documents/{document_id}",
+            headers=_auth_headers(),
+            timeout=self.timeout,
         )
         _raise_for_detail(response)
 
@@ -52,10 +58,17 @@ class ApiClient:
         response = requests.post(
             f"{self.base_url}/chat/ask",
             json=payload,
+            headers=_auth_headers(),
             timeout=self.timeout,
         )
         _raise_for_detail(response)
         return response.json()
+
+
+def _auth_headers() -> dict[str, str]:
+    """Bearer header from the token this browser session entered in the sidebar."""
+    token = st.session_state.get("api_token", "")
+    return {"Authorization": f"Bearer {token}"} if token else {}
 
 
 def _raise_for_detail(response: requests.Response) -> None:

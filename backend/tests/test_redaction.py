@@ -7,6 +7,7 @@ so it is obviously not real and secret scanners don't flag this file.
 import logging
 
 import pytest
+from conftest import AUTH_A
 from fastapi.testclient import TestClient
 
 from app.api.routes import chat
@@ -86,7 +87,7 @@ class FakeStore:
     def __init__(self, text):
         self.text = text
 
-    def similarity_search(self, query):
+    def similarity_search(self, query, owner_id):
         return [RetrievedChunk(content=self.text, document_id="d1", document_name="a.pdf",
                                page_number=1, chunk_index=0, score=0.9)]
 
@@ -100,7 +101,7 @@ class EchoLLM:
 def test_chat_redacts_context_and_answer_but_keeps_facts():
     llm = EchoLLM()
     doc = f"Office opens at 9am. password: FakePass2024 token {FAKE['github_token']}"
-    response = ChatService(vector_store=FakeStore(doc), llm_service=llm).ask("When?")
+    response = ChatService(vector_store=FakeStore(doc), llm_service=llm).ask("When?", owner_id="user-a")
     assert "FakePass2024" not in llm.context and FAKE["github_token"] not in llm.context
     assert "Office opens at 9am." in llm.context
     assert FAKE["google_api_key"] not in response.answer
@@ -109,11 +110,11 @@ def test_chat_redacts_context_and_answer_but_keeps_facts():
 
 def test_error_detail_is_redacted(monkeypatch):
     class Failing:
-        def ask(self, question):
+        def ask(self, question, owner_id):
             raise RuntimeError(f"Gemini request failed: key={FAKE['google_api_key']}")
 
     monkeypatch.setattr(chat, "get_chat_service", Failing)
-    response = TestClient(app).post("/chat/ask", json={"question": "hi"})
+    response = TestClient(app, headers=AUTH_A).post("/chat/ask", json={"question": "hi"})
     assert response.status_code == 503
     assert FAKE["google_api_key"] not in response.text
 

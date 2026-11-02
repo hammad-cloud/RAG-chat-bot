@@ -21,7 +21,7 @@ class FakeStore:
     def __init__(self, chunks):
         self.chunks = chunks
 
-    def similarity_search(self, query):
+    def similarity_search(self, query, owner_id):
         return self.chunks
 
 
@@ -65,7 +65,7 @@ def test_user_prompt_keeps_documents_and_question_separate():
 
 def test_ask_sends_sanitized_context_and_keeps_sources():
     llm = CapturingLLM()
-    response = ChatService(FakeStore([chunk(INJECTION)]), llm).ask("What is included?")
+    response = ChatService(FakeStore([chunk(INJECTION)]), llm).ask("What is included?", owner_id="user-a")
     assert response.answer == "ok"
     assert response.sources[0].document_name == "test.pdf"
     assert llm.context.count("</document>") == 1
@@ -73,6 +73,6 @@ def test_ask_sends_sanitized_context_and_keeps_sources():
 
 def test_ask_skips_llm_when_all_chunks_empty():
     llm = CapturingLLM()
-    response = ChatService(FakeStore([chunk("   ")]), llm).ask("Anything?")
+    response = ChatService(FakeStore([chunk("   ")]), llm).ask("Anything?", owner_id="user-a")
     assert response.answer == UNKNOWN_ANSWER
     assert not hasattr(llm, "context")

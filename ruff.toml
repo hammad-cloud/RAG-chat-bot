@@ -9,4 +9,4 @@ known-first-party = ["app", "components", "config", "services", "utils"]
 
 [lint.flake8-bugbear]
 # FastAPI declares params via File()/Depends() defaults.
-extend-immutable-calls = ["fastapi.File"]
+extend-immutable-calls = ["fastapi.File", "fastapi.Depends"]

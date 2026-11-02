@@ -1,9 +1,10 @@
+from conftest import AUTH_A
 from fastapi.testclient import TestClient
 
 from app.api.routes import chat, documents
 from app.main import app
 
-client = TestClient(app)
+client = TestClient(app, headers=AUTH_A)
 
 
 class Boom:

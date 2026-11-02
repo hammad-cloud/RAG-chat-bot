@@ -22,12 +22,12 @@ class ChatService:
         self.vector_store = vector_store or VectorStoreService()
         self.llm_service = llm_service or LLMService()
 
-    def ask(self, question: str) -> AskResponse:
+    def ask(self, question: str, *, owner_id: str) -> AskResponse:
         cleaned_question = question.strip()
         if not cleaned_question:
             return AskResponse(answer=UNKNOWN_ANSWER, source=None, sources=[])
 
-        retrieved = self.vector_store.similarity_search(cleaned_question)
+        retrieved = self.vector_store.similarity_search(cleaned_question, owner_id=owner_id)
         if not retrieved:
             return AskResponse(answer=UNKNOWN_ANSWER, source=None, sources=[])
 

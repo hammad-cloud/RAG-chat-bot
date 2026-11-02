@@ -18,7 +18,7 @@ class DocumentService:
     def __init__(self, vector_store: VectorStoreService | None = None) -> None:
         self.vector_store = vector_store or VectorStoreService()
 
-    def process_upload(self, filename: str, content: bytes) -> StoredDocument:
+    def process_upload(self, filename: str, content: bytes, *, owner_id: str) -> StoredDocument:
         safe_name = Path(filename).name
         extension = Path(safe_name).suffix.lower()
 
@@ -49,9 +49,12 @@ class DocumentService:
             document_name=safe_name,
             chunks=chunks,
             uploaded_at=uploaded_at,
+            owner_id=owner_id,
         )
         # Saved only after indexing succeeds, so rejected files leave nothing behind.
-        (settings.upload_dir / f"{document_id}_{safe_name}").write_bytes(content)
+        user_dir = settings.upload_dir / owner_id
+        user_dir.mkdir(exist_ok=True)
+        (user_dir / f"{document_id}_{safe_name}").write_bytes(content)
 
         return StoredDocument(
             document_id=document_id,
@@ -60,12 +63,14 @@ class DocumentService:
             uploaded_at=uploaded_at,
         )
 
-    def list_documents(self) -> list[StoredDocument]:
-        return self.vector_store.list_documents()
+    def list_documents(self, *, owner_id: str) -> list[StoredDocument]:
+        return self.vector_store.list_documents(owner_id=owner_id)
 
-    def delete_document(self, document_id: str) -> bool:
-        """Remove a document from the index and disk. False if it did not exist."""
-        removed = self.vector_store.delete_by_document_id(document_id)
-        for path in settings.upload_dir.glob(f"{document_id}_*"):
+    def delete_document(self, document_id: str, *, owner_id: str) -> bool:
+        """Remove the owner's document from the index and disk. False if they don't own it."""
+        removed = self.vector_store.delete_by_document_id(document_id, owner_id=owner_id)
+        if not removed:
+            return False  # never touch files for an id the owner doesn't have indexed
+        for path in (settings.upload_dir / owner_id).glob(f"{document_id}_*"):
             path.unlink(missing_ok=True)
-        return removed > 0
+        return True

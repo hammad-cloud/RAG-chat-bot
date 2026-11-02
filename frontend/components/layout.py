@@ -22,6 +22,13 @@ def render_sidebar() -> None:
     with st.sidebar:
         st.markdown(f"### {settings.app_title}")
         st.caption("Document-grounded Q&A")
+        # Stored outside the widget key so it survives switching pages.
+        st.session_state["api_token"] = st.text_input(
+            "Access token",
+            value=st.session_state.get("api_token", ""),
+            type="password",
+            help="Your personal token. You only see and search your own documents.",
+        )
         st.divider()
         st.markdown("**Navigate**")
         st.markdown("- Home")

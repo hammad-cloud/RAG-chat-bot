@@ -133,6 +133,10 @@ Open http://localhost:8501, upload a document on **Upload Documents**, then ask 
 | DELETE | `/documents/{id}` | Remove a document and its chunks |
 | POST | `/chat/ask` | `{"question": "..."}` → answer and sources |
 
+Every endpoint except `/health` needs `Authorization: Bearer <token>`. Users only upload,
+list, delete and search their own documents; the user is taken from the token, never from
+the request. Enter your token in the frontend sidebar.
+
 ## Configuration
 
 All settings live in `backend/.env`:
@@ -148,6 +152,7 @@ All settings live in `backend/.env`:
 | `MAX_UPLOAD_MB` | `20` | Largest accepted upload |
 | `REDACT_SECRETS` | `true` | Redact credentials in retrieved text, answers, errors and logs |
 | `SECRET_PATTERNS` | `[]` | Extra regexes to redact, as a JSON list, e.g. `["EMP-\d{6}"]` |
+| `AUTH_TOKENS` | `{}` | `{"<sha256 of token>": "<user_id>"}`; see `backend/.env.example` |
 
 Never commit your `.env` files. API keys stay on the backend; the frontend only knows `BACKEND_API_URL`.
 
@@ -159,6 +164,16 @@ log line. It matches the backend's own configured keys exactly, known token form
 OpenAI, AWS, GitHub, Slack, Stripe, JWT, private keys, bearer tokens, `user:pass@` URLs), and
 `password: …` / `API_KEY=…` assignments whose value is 8+ characters with a digit, so prose like
 "the password policy requires 12 characters" is left alone.
+
+### Upgrading: documents uploaded before per-user access
+
+Older documents have no owner, so no user can see them after upgrading (nothing is deleted).
+Back up `backend/data/chroma` and `backend/uploads`, then assign them to a user from `backend/`:
+
+```bash
+python -m scripts.assign_owner <user_id>          # dry run: lists what would change
+python -m scripts.assign_owner <user_id> --apply  # adds owner_id, moves files to uploads/<user_id>/
+```
 
 ## Development
 

@@ -28,6 +28,8 @@ class VectorStoreService:
         document_name: str,
         chunks: list[TextChunk],
         uploaded_at: str,
+        *,
+        owner_id: str,
     ) -> int:
         if not chunks:
             return 0
@@ -42,6 +44,7 @@ class VectorStoreService:
             metadatas.append(
                 {
                     "document_id": document_id,
+                    "owner_id": owner_id,
                     "document_name": document_name,
                     "chunk_index": chunk.chunk_index,
                     "page_number": chunk.page_number if chunk.page_number is not None else -1,
@@ -52,7 +55,10 @@ class VectorStoreService:
         self._collection.add(ids=ids, documents=documents, metadatas=metadatas)
         return len(ids)
 
-    def similarity_search(self, query: str, top_k: int | None = None) -> list[RetrievedChunk]:
+    def similarity_search(
+        self, query: str, top_k: int | None = None, *, owner_id: str
+    ) -> list[RetrievedChunk]:
+        """Search only the chunks owned by `owner_id`."""
         limit = top_k or settings.retrieval_top_k
         if self._collection.count() == 0:
             return []
@@ -60,6 +66,7 @@ class VectorStoreService:
         result = self._collection.query(
             query_texts=[query],
             n_results=min(limit, self._collection.count()),
+            where={"owner_id": owner_id},
             include=["documents", "metadatas", "distances"],
         )
 
@@ -84,10 +91,11 @@ class VectorStoreService:
             )
         return retrieved
 
-    def list_documents(self) -> list[StoredDocument]:
-        """One entry per uploaded document, newest first."""
+    def list_documents(self, *, owner_id: str) -> list[StoredDocument]:
+        """One entry per document owned by `owner_id`, newest first."""
         documents: dict[str, StoredDocument] = {}
-        for metadata in self._collection.get(include=["metadatas"])["metadatas"] or []:
+        owned = self._collection.get(where={"owner_id": owner_id}, include=["metadatas"])
+        for metadata in owned["metadatas"] or []:
             document_id = str(metadata.get("document_id", ""))
             if document_id not in documents:
                 documents[document_id] = StoredDocument(
@@ -99,9 +107,10 @@ class VectorStoreService:
             documents[document_id].chunk_count += 1
         return sorted(documents.values(), key=lambda d: d.uploaded_at, reverse=True)
 
-    def delete_by_document_id(self, document_id: str) -> int:
-        """Delete a document's chunks and return how many were removed."""
-        ids = self._collection.get(where={"document_id": document_id}, include=[])["ids"]
+    def delete_by_document_id(self, document_id: str, *, owner_id: str) -> int:
+        """Delete a document's chunks if `owner_id` owns it; return how many were removed."""
+        where = {"$and": [{"document_id": document_id}, {"owner_id": owner_id}]}
+        ids = self._collection.get(where=where, include=[])["ids"]
         if ids:
             self._collection.delete(ids=ids)
         return len(ids)
