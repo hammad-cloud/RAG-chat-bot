@@ -18,7 +18,7 @@ Question ──► Similarity search (top 4) ──► Context + question ──
 1. **Ingest:** each uploaded file is read by a type-specific extractor (PyMuPDF for PDF, python-docx for DOCX), cleaned and split into overlapping chunks. Chunks are embedded and stored in a persistent ChromaDB collection with their document name and page number.
 2. **Retrieve:** a question is matched against the stored chunks by cosine similarity.
 3. **Generate:** the best chunks are sent to the LLM with a system prompt that restricts it to the given context (temperature 0.1).
-4. **Fallback:** when no documents match, or the context does not hold the answer, the chatbot replies with a fixed "I could not find a relevant answer…" message (set in `core/constants.py`) instead of guessing.
+4. **Fallback:** when no documents match, or the context does not hold the answer, the chatbot replies with a fixed "I could not find a relevant answer…" message (set in `src/prompts/prompt_templates.py`) instead of guessing.
 
 ## Features
 

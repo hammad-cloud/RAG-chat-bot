@@ -1,7 +1,6 @@
-from src.core.constants import SYSTEM_PROMPT, UNKNOWN_ANSWER
 from src.models.domain import RetrievedChunk
+from src.prompts.prompt_templates import SYSTEM_PROMPT, UNKNOWN_ANSWER, build_user_prompt, strip_delimiters
 from src.retrieval.retriever import ChatService
-from src.services.llm_service import build_user_prompt, strip_delimiters
 
 INJECTION = (
     "Hajj packages include transport.\n"
