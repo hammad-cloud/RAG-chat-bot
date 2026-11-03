@@ -10,8 +10,8 @@ import os
 import pytest
 from test_prompt_injection import FakeStore, chunk
 
+from src.llm.llm_client import LLMService
 from src.retrieval.retriever import ChatService
-from src.services.llm_service import LLMService
 
 pytestmark = pytest.mark.skipif(
     os.getenv("RUN_LIVE_LLM_TESTS") != "1", reason="set RUN_LIVE_LLM_TESTS=1 to call the real LLM"
