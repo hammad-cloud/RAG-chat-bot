@@ -61,11 +61,10 @@ frontend/.streamlit/secrets.toml
 # =========================
 # Project runtime data
 # =========================
-backend/uploads/*
-!backend/uploads/.gitkeep
-backend/data/*
-!backend/data/.gitkeep
-backend/data/chroma/
+uploads/*
+!uploads/.gitkeep
+data/*
+!data/.gitkeep
 chroma/
 .chromadb/
 *.db

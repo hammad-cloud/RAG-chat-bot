@@ -92,20 +92,19 @@ RAG-chat-bot/
 
 Requires Python 3.10+ and a [Gemini API key](https://aistudio.google.com/apikey) (or an OpenAI key).
 
-### 1. Backend
+### 1. Backend (repo root)
 
 ```bash
-cd backend
 python -m venv .venv
 .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 copy .env.example .env          # macOS/Linux: cp .env.example .env
 ```
 
-Open `backend/.env` and set `GEMINI_API_KEY` (or set `LLM_PROVIDER=openai` and `OPENAI_API_KEY`). Then start the API:
+Open `.env` and set `GEMINI_API_KEY` (or set `LLM_PROVIDER=openai` and `OPENAI_API_KEY`). Then start the API:
 
 ```bash
-uvicorn app.main:app --reload --port 8000
+python main.py                  # or: uvicorn main:app --reload --port 8000
 ```
 
 API docs: http://localhost:8000/docs
@@ -139,7 +138,7 @@ the request. Enter your token in the frontend sidebar.
 
 ## Configuration
 
-All settings live in `backend/.env`:
+All settings live in `.env` at the repo root:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
@@ -152,13 +151,13 @@ All settings live in `backend/.env`:
 | `MAX_UPLOAD_MB` | `20` | Largest accepted upload |
 | `REDACT_SECRETS` | `true` | Redact credentials in retrieved text, answers, errors and logs |
 | `SECRET_PATTERNS` | `[]` | Extra regexes to redact, as a JSON list, e.g. `["EMP-\d{6}"]` |
-| `AUTH_TOKENS` | `{}` | `{"<sha256 of token>": "<user_id>"}`; see `backend/.env.example` |
+| `AUTH_TOKENS` | `{}` | `{"<sha256 of token>": "<user_id>"}`; see `.env.example` |
 
 Never commit your `.env` files. API keys stay on the backend; the frontend only knows `BACKEND_API_URL`.
 
 ### Credential redaction
 
-`backend/app/core/redaction.py` replaces likely credentials with `[REDACTED:<rule>]` before
+`src/core/redaction.py` replaces likely credentials with `[REDACTED:<rule>]` before
 document text reaches the LLM, before answers and error messages reach the user, and in every
 log line. It matches the backend's own configured keys exactly, known token formats (Google,
 OpenAI, AWS, GitHub, Slack, Stripe, JWT, private keys, bearer tokens, `user:pass@` URLs), and
@@ -168,7 +167,7 @@ OpenAI, AWS, GitHub, Slack, Stripe, JWT, private keys, bearer tokens, `user:pass
 ### Upgrading: documents uploaded before per-user access
 
 Older documents have no owner, so no user can see them after upgrading (nothing is deleted).
-Back up `backend/data/chroma` and `backend/uploads`, then assign them to a user from `backend/`:
+Back up `data/chroma` and `uploads/`, then assign them to a user from the repo root:
 
 ```bash
 python -m scripts.assign_owner <user_id>          # dry run: lists what would change
@@ -178,10 +177,9 @@ python -m scripts.assign_owner <user_id> --apply  # adds owner_id, moves files t
 ## Development
 
 ```bash
-cd backend
 pip install -r requirements-dev.txt
 pytest -q            # tests use a temporary ChromaDB, no API key needed
-ruff check ..        # lint backend and frontend
+ruff check .         # lint backend and frontend
 ```
 
 CI runs the same lint and tests on every push.
