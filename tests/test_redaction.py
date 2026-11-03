@@ -133,3 +133,13 @@ def test_logs_are_redacted(caplog):
     assert FAKE["aws_access_key"] not in caplog.text
     assert "port 8000" in caplog.text
     assert "[REDACTED:openai_key]" in caplog.text
+
+
+def test_logs_are_written_to_log_file_redacted():
+    redaction.setup_logging()
+    logging.getLogger("rag.test").warning("leaked AKIAABCDEFGHIJKLMNOP in a log line")
+    for handler in logging.getLogger().handlers:
+        handler.flush()
+    text = settings.log_file.read_text(encoding="utf-8")
+    assert "[REDACTED:aws_access_key]" in text
+    assert "AKIAABCDEFGHIJKLMNOP" not in text

@@ -9,6 +9,7 @@ from pathlib import Path
 _tmp = Path(tempfile.mkdtemp(prefix="rag-tests-"))
 os.environ["UPLOAD_DIR"] = str(_tmp / "uploads")
 os.environ["CHROMA_DIR"] = str(_tmp / "chroma")
+os.environ["LOG_FILE"] = str(_tmp / "logs" / "app.log")
 
 # Two dummy users. The backend only ever sees the SHA-256 hashes of their tokens.
 import hashlib  # noqa: E402

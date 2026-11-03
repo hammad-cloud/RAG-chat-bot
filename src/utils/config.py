@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     collection_name: str = "company_documents"
     max_upload_mb: int = 20
 
+    log_file: Path = BASE_DIR / "logs" / "app.log"
+    log_level: str = "INFO"
+
     chunk_size: int = 900
     chunk_overlap: int = 150
     retrieval_top_k: int = 4
@@ -82,7 +85,7 @@ class Settings(BaseSettings):
                 raise ValueError(f"Invalid user id in AUTH_TOKENS: {user_id!r}")
         return tokens
 
-    @field_validator("upload_dir", "chroma_dir")
+    @field_validator("upload_dir", "chroma_dir", "log_file")
     @classmethod
     def _resolve_path(cls, path: Path) -> Path:
         # Relative paths (e.g. from config.yaml) are relative to the project root, not the cwd.

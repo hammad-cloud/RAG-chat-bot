@@ -7,6 +7,7 @@ value looks like a real secret) so ordinary document text is left alone.
 from __future__ import annotations
 
 import logging
+import logging.handlers
 import re
 import traceback
 from functools import lru_cache
@@ -102,3 +103,22 @@ def install_log_redaction() -> None:
 
     factory.redacting = True  # type: ignore[attr-defined]
     logging.setLogRecordFactory(factory)
+
+
+def setup_logging() -> None:
+    """Log to the console and to a rotating `settings.log_file` (logs/app.log by default)."""
+    install_log_redaction()
+    root = logging.getLogger()
+    root.setLevel(settings.log_level.upper())
+    if any(getattr(h, "rag_app_handler", False) for h in root.handlers):
+        return  # already configured (e.g. module re-imported)
+
+    settings.log_file.parent.mkdir(parents=True, exist_ok=True)
+    file_handler = logging.handlers.RotatingFileHandler(
+        settings.log_file, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    )
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    )
+    file_handler.rag_app_handler = True  # type: ignore[attr-defined]
+    root.addHandler(file_handler)

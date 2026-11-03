@@ -5,14 +5,17 @@ Run with `python main.py` or `uvicorn main:app --reload`.
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes import chat_router, documents_router, health_router
 from src.utils.config import settings
-from src.utils.helpers import install_log_redaction
+from src.utils.helpers import setup_logging
 
-install_log_redaction()
+setup_logging()
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=settings.app_name,
@@ -31,6 +34,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(documents_router)
 app.include_router(chat_router)
+logger.info("%s started (LLM provider: %s)", settings.app_name, settings.llm_provider)
 
 
 if __name__ == "__main__":

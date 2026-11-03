@@ -30,4 +30,6 @@ upload_dir: uploads
 max_upload_mb: 20
 
 # --- Logging ---
-redact_secrets: true
+log_file: logs/app.log
+log_level: INFO
+redact_secrets: true        # credentials are masked in logs, answers and errors

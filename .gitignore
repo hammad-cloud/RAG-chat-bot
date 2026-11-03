@@ -73,7 +73,8 @@ chroma/
 # =========================
 # Logs / temp
 # =========================
-logs/
+logs/*
+!logs/.gitkeep
 *.log
 tmp/
 temp/
