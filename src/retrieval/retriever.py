@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from html import escape
 
+from src.api.schemas import AskResponse, SourceInfo
 from src.core.config import settings
 from src.core.redaction import redact
 from src.llm.llm_client import LLMService
 from src.models.domain import RetrievedChunk
-from src.models.schemas import AskResponse, SourceInfo
 from src.prompts.prompt_templates import UNKNOWN_ANSWER, strip_delimiters
 from src.vectordb.vector_store import VectorStoreService
 

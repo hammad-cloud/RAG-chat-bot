@@ -15,10 +15,10 @@ from fastapi.testclient import TestClient
 
 from main import app
 from scripts.assign_owner import assign_unowned
-from src.api.routes import chat
+from src.api import routes
+from src.api.dependencies import get_vector_store
 from src.core.config import settings
 from src.retrieval.retriever import ChatService
-from src.services.dependencies import get_vector_store
 
 FACT_A = "Project Falcon's launch code word is MANGO."
 FACT_B = "Project Heron's approved budget is 9,999 dinars."
@@ -39,7 +39,7 @@ class ContextLLM:
 @pytest.fixture(autouse=True)
 def leaky_llm(monkeypatch):
     monkeypatch.setattr(
-        chat, "get_chat_service", lambda: ChatService(get_vector_store(), ContextLLM())
+        routes, "get_chat_service", lambda: ChatService(get_vector_store(), ContextLLM())
     )
 
 

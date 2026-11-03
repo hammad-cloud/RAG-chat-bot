@@ -11,7 +11,7 @@ from conftest import AUTH_A
 from fastapi.testclient import TestClient
 
 from main import app
-from src.api.routes import chat
+from src.api import routes
 from src.core import redaction
 from src.core.config import settings
 from src.core.redaction import redact
@@ -113,7 +113,7 @@ def test_error_detail_is_redacted(monkeypatch):
         def ask(self, question, owner_id):
             raise RuntimeError(f"Gemini request failed: key={FAKE['google_api_key']}")
 
-    monkeypatch.setattr(chat, "get_chat_service", Failing)
+    monkeypatch.setattr(routes, "get_chat_service", Failing)
     response = TestClient(app, headers=AUTH_A).post("/chat/ask", json={"question": "hi"})
     assert response.status_code == 503
     assert FAKE["google_api_key"] not in response.text

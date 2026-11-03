@@ -1,4 +1,4 @@
-"""Document upload endpoints."""
+"""API endpoints: health, document upload/list/delete, and chat."""
 
 from __future__ import annotations
 
@@ -7,18 +7,30 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-from src.core.auth import get_current_user
+from src.api.auth import get_current_user
+from src.api.dependencies import get_chat_service, get_document_service
+from src.api.schemas import AskRequest, AskResponse, DocumentInfo, DocumentUploadResponse
 from src.core.config import settings
 from src.core.redaction import redact
 from src.ingestion.loader import UnsupportedFileTypeError
-from src.models.schemas import DocumentInfo, DocumentUploadResponse
-from src.services.dependencies import get_document_service
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+
+health_router = APIRouter(tags=["health"])
+documents_router = APIRouter(prefix="/documents", tags=["documents"])
+chat_router = APIRouter(prefix="/chat", tags=["chat"])
 
 
-@router.post("/upload", response_model=DocumentUploadResponse)
+# ---------- Health ----------
+
+@health_router.get("/health")
+def health_check() -> dict[str, str]:
+    return {"status": "ok", "service": "rag-chatbot-backend"}
+
+
+# ---------- Documents ----------
+
+@documents_router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(
     file: UploadFile = File(...), user_id: str = Depends(get_current_user)
 ) -> DocumentUploadResponse:
@@ -55,7 +67,7 @@ async def upload_document(
     )
 
 
-@router.get("", response_model=list[DocumentInfo])
+@documents_router.get("", response_model=list[DocumentInfo])
 def list_documents(user_id: str = Depends(get_current_user)) -> list[DocumentInfo]:
     return [
         DocumentInfo(
@@ -68,8 +80,24 @@ def list_documents(user_id: str = Depends(get_current_user)) -> list[DocumentInf
     ]
 
 
-@router.delete("/{document_id}", status_code=204)
+@documents_router.delete("/{document_id}", status_code=204)
 def delete_document(document_id: UUID, user_id: str = Depends(get_current_user)) -> None:
     # UUID-only ids block glob/wildcard tricks; someone else's id looks the same as a missing one.
     if not get_document_service().delete_document(str(document_id), owner_id=user_id):
         raise HTTPException(status_code=404, detail="Document not found.")
+
+
+# ---------- Chat ----------
+
+@chat_router.post("/ask", response_model=AskResponse)
+def ask_question(payload: AskRequest, user_id: str = Depends(get_current_user)) -> AskResponse:
+    service = get_chat_service()
+    try:
+        return service.ask(payload.question, owner_id=user_id)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=redact(str(exc))) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=redact(str(exc))) from exc
+    except Exception as exc:
+        logger.exception("Unexpected error in chat route")
+        raise HTTPException(status_code=500, detail="Failed to generate answer.") from exc

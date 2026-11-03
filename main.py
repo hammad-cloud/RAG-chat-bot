@@ -8,7 +8,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import chat, documents, health
+from src.api.routes import chat_router, documents_router, health_router
 from src.core.config import settings
 from src.core.redaction import install_log_redaction
 
@@ -28,9 +28,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(health.router)
-app.include_router(documents.router, prefix="/documents", tags=["documents"])
-app.include_router(chat.router, prefix="/chat", tags=["chat"])
+app.include_router(health_router)
+app.include_router(documents_router)
+app.include_router(chat_router)
 
 
 if __name__ == "__main__":

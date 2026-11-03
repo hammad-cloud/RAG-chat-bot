@@ -2,7 +2,7 @@ from conftest import AUTH_A
 from fastapi.testclient import TestClient
 
 from main import app
-from src.api.routes import chat, documents
+from src.api import routes
 
 client = TestClient(app, headers=AUTH_A)
 
@@ -15,14 +15,14 @@ class Boom:
 
 
 def test_chat_500_hides_internal_error(monkeypatch):
-    monkeypatch.setattr(chat, "get_chat_service", Boom)
+    monkeypatch.setattr(routes, "get_chat_service", Boom)
     response = client.post("/chat/ask", json={"question": "hi"})
     assert response.status_code == 500
     assert response.json() == {"detail": "Failed to generate answer."}
 
 
 def test_upload_500_hides_internal_error(monkeypatch):
-    monkeypatch.setattr(documents, "get_document_service", Boom)
+    monkeypatch.setattr(routes, "get_document_service", Boom)
     response = client.post("/documents/upload", files={"file": ("a.txt", b"hi")})
     assert response.status_code == 500
     assert "secret" not in response.text
@@ -38,11 +38,11 @@ def test_health():
 
 
 def test_upload_list_ask_delete_flow(monkeypatch):
+    from src.api.dependencies import get_vector_store
     from src.retrieval.retriever import ChatService
-    from src.services.dependencies import get_vector_store
 
     monkeypatch.setattr(
-        chat,
+        routes,
         "get_chat_service",
         lambda: ChatService(vector_store=get_vector_store(), llm_service=FakeLLM()),
     )
@@ -68,7 +68,7 @@ def test_upload_rejections(monkeypatch):
     assert client.post("/documents/upload", files={"file": ("a.exe", b"x")}).status_code == 400
     assert client.post("/documents/upload", files={"file": ("a.txt", b"")}).status_code == 400
 
-    monkeypatch.setattr(documents.settings, "max_upload_mb", 0)
+    monkeypatch.setattr(routes.settings, "max_upload_mb", 0)
     assert client.post("/documents/upload", files={"file": ("a.txt", b"x")}).status_code == 413
 
 
