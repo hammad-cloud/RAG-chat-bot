@@ -10,7 +10,7 @@ from src.core.redaction import redact
 from src.models.domain import RetrievedChunk
 from src.models.schemas import AskResponse, SourceInfo
 from src.services.llm_service import LLMService, strip_delimiters
-from src.services.vector_store import VectorStoreService
+from src.vectordb.vector_store import VectorStoreService
 
 
 class ChatService:

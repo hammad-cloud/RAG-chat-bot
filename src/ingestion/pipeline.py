@@ -10,7 +10,7 @@ from src.chunking.chunker import chunk_document
 from src.core.config import settings
 from src.ingestion.loader import ALLOWED_EXTENSIONS, UnsupportedFileTypeError, get_extractor
 from src.models.domain import StoredDocument
-from src.services.vector_store import VectorStoreService
+from src.vectordb.vector_store import VectorStoreService
 
 
 class DocumentService:

@@ -1,5 +1,5 @@
 from src.models.domain import TextChunk
-from src.services.vector_store import VectorStoreService
+from src.vectordb.vector_store import VectorStoreService
 
 
 def chunks(*texts):

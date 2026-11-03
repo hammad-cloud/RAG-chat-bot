@@ -16,7 +16,7 @@ import argparse
 from collections import Counter
 
 from src.core.config import settings
-from src.services.vector_store import VectorStoreService
+from src.vectordb.vector_store import VectorStoreService
 
 
 def assign_unowned(store: VectorStoreService, owner_id: str, apply: bool = False) -> Counter:
