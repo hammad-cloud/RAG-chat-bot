@@ -44,48 +44,47 @@ Question ──► Similarity search (top 4) ──► Context + question ──
 
 ```
 RAG-chat-bot/
-├── backend/                     # FastAPI service
-│   ├── app/
-│   │   ├── main.py              # App entry point, CORS, routers
-│   │   ├── api/routes/
-│   │   │   ├── chat.py          # POST /chat/ask
-│   │   │   ├── documents.py     # Upload, list and delete documents
-│   │   │   └── health.py        # GET /health
-│   │   ├── core/
-│   │   │   ├── config.py        # Settings loaded from .env
-│   │   │   └── constants.py     # System prompt, fallback answer
-│   │   ├── models/
-│   │   │   ├── domain.py        # Internal data classes (chunks, documents)
-│   │   │   └── schemas.py       # Request/response models
-│   │   ├── processing/
-│   │   │   ├── chunking.py      # Text cleaning + overlapping chunks
-│   │   │   └── extractors/      # PDF, DOCX, TXT extractors + factory
-│   │   └── services/
-│   │       ├── chat_service.py      # Retrieve → build context → answer
-│   │       ├── document_service.py  # Upload → extract → chunk → store
-│   │       ├── llm_service.py       # Gemini / OpenAI calls
-│   │       ├── vector_store.py      # ChromaDB wrapper
-│   │       └── dependencies.py      # Shared service instances
-│   ├── data/                    # ChromaDB storage (created at runtime)
-│   ├── uploads/                 # Uploaded files
-│   ├── tests/                   # pytest suite
-│   ├── requirements.txt
-│   ├── requirements-dev.txt     # + pytest, ruff
-│   └── .env.example
-├── frontend/                    # Streamlit app
-│   ├── Home.py                  # Landing page
-│   ├── pages/
-│   │   ├── 1_Upload_Documents.py
-│   │   └── 2_Chat.py
-│   ├── components/layout.py     # Shared page layout
-│   ├── services/api_client.py   # Calls the FastAPI backend
-│   ├── config/settings.py       # Frontend settings from .env
-│   ├── utils/helpers.py
-│   ├── requirements.txt
-│   └── .env.example
-├── .github/workflows/ci.yml     # Lint + tests on every push
-├── ruff.toml                    # Lint rules
-└── README.md
+├── README.md                # Project description, setup, how to run, architecture
+├── requirements.txt         # Python dependencies (requirements-dev.txt adds pytest, ruff)
+├── .env                     # API keys and secrets (not pushed to GitHub; see .env.example)
+├── .gitignore               # Files/folders Git ignores
+├── config.yaml              # Models, chunk size, retrieval and DB settings
+├── src/
+│   ├── ingestion/
+│   │   ├── loader.py        # Load text from PDF, DOCX, TXT
+│   │   └── pipeline.py      # Upload pipeline: load → chunk → store
+│   ├── chunking/
+│   │   └── chunker.py       # Clean text, split into overlapping chunks
+│   ├── embeddings/
+│   │   └── embedder.py      # Turn text chunks into embeddings
+│   ├── vectordb/
+│   │   └── vector_store.py  # ChromaDB: add, search, list, delete (per user)
+│   ├── retrieval/
+│   │   └── retriever.py     # Similarity search → context → answer with sources
+│   ├── prompts/
+│   │   └── prompt_templates.py  # System prompt, fallback answer, prompt builder
+│   ├── llm/
+│   │   └── llm_client.py    # Gemini / OpenAI calls
+│   ├── api/
+│   │   ├── routes.py        # FastAPI endpoints: /health, /documents, /chat/ask
+│   │   ├── auth.py          # Bearer-token authentication
+│   │   ├── schemas.py       # Request/response models
+│   │   └── dependencies.py  # Shared service instances
+│   └── utils/
+│       ├── helpers.py       # Credential redaction, logging setup
+│       ├── config.py        # Settings from config.yaml + .env
+│       └── models.py        # Internal data classes (chunks, documents)
+├── tests/
+│   ├── test_app.py          # API endpoint tests
+│   └── test_*.py            # Unit + integration tests per module
+├── logs/
+│   └── app.log              # Runtime log (created on start, not pushed)
+├── main.py                  # Entry point: builds the FastAPI app
+├── scripts/assign_owner.py  # One-off migration for pre-isolation documents
+├── data/                    # ChromaDB storage (runtime, not pushed)
+├── uploads/                 # Uploaded files (runtime, not pushed)
+├── frontend/                # Streamlit app (Home.py, pages/, services/api_client.py)
+└── .github/workflows/ci.yml # Lint + tests on every push
 ```
 
 ## Getting started
