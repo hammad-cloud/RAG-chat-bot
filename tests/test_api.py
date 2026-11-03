@@ -38,7 +38,7 @@ def test_health():
 
 
 def test_upload_list_ask_delete_flow(monkeypatch):
-    from src.services.chat_service import ChatService
+    from src.retrieval.retriever import ChatService
     from src.services.dependencies import get_vector_store
 
     monkeypatch.setattr(

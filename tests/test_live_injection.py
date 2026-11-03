@@ -10,7 +10,7 @@ import os
 import pytest
 from test_prompt_injection import FakeStore, chunk
 
-from src.services.chat_service import ChatService
+from src.retrieval.retriever import ChatService
 from src.services.llm_service import LLMService
 
 pytestmark = pytest.mark.skipif(

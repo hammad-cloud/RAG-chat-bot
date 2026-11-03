@@ -16,7 +16,7 @@ from src.core import redaction
 from src.core.config import settings
 from src.core.redaction import redact
 from src.models.domain import RetrievedChunk
-from src.services.chat_service import ChatService
+from src.retrieval.retriever import ChatService
 
 FAKE = {
     "google_api_key": "AIza" + "FAKE0TEST0KEY0" + "x" * 21,

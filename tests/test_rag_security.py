@@ -20,7 +20,7 @@ from fastapi.testclient import TestClient
 from main import app
 from src.core.config import settings
 from src.core.constants import SYSTEM_PROMPT
-from src.services.chat_service import ChatService
+from src.retrieval.retriever import ChatService
 from src.services.dependencies import get_vector_store
 from src.services.llm_service import LLMService, build_user_prompt
 

@@ -17,7 +17,7 @@ from main import app
 from scripts.assign_owner import assign_unowned
 from src.api.routes import chat
 from src.core.config import settings
-from src.services.chat_service import ChatService
+from src.retrieval.retriever import ChatService
 from src.services.dependencies import get_vector_store
 
 FACT_A = "Project Falcon's launch code word is MANGO."

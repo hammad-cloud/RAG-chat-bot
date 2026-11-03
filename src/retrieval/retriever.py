@@ -1,4 +1,4 @@
-"""RAG chat orchestration service."""
+"""Retrieve relevant chunks by similarity search, then answer with the LLM."""
 
 from __future__ import annotations
 

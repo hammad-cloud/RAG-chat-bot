@@ -1,6 +1,6 @@
 from src.core.constants import SYSTEM_PROMPT, UNKNOWN_ANSWER
 from src.models.domain import RetrievedChunk
-from src.services.chat_service import ChatService
+from src.retrieval.retriever import ChatService
 from src.services.llm_service import build_user_prompt, strip_delimiters
 
 INJECTION = (
