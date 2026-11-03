@@ -6,10 +6,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
+from src.chunking.chunker import chunk_document
 from src.core.config import settings
 from src.ingestion.loader import ALLOWED_EXTENSIONS, UnsupportedFileTypeError, get_extractor
 from src.models.domain import StoredDocument
-from src.processing.chunking import chunk_document
 from src.services.vector_store import VectorStoreService
 
 
