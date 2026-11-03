@@ -10,8 +10,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from src.core.auth import get_current_user
 from src.core.config import settings
 from src.core.redaction import redact
+from src.ingestion.loader import UnsupportedFileTypeError
 from src.models.schemas import DocumentInfo, DocumentUploadResponse
-from src.processing.extractors.factory import UnsupportedFileTypeError
 from src.services.dependencies import get_document_service
 
 logger = logging.getLogger(__name__)

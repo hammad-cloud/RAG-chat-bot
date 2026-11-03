@@ -1,7 +1,7 @@
 import pytest
 
 from src.core.config import settings
-from src.services.document_service import DocumentService
+from src.ingestion.pipeline import DocumentService
 
 
 class FakeStore:

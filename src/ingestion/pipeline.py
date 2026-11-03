@@ -1,4 +1,4 @@
-"""Document upload and indexing pipeline."""
+"""Upload pipeline: load -> chunk -> store in the vector database."""
 
 from __future__ import annotations
 
@@ -7,10 +7,9 @@ from pathlib import Path
 from uuid import uuid4
 
 from src.core.config import settings
-from src.core.constants import ALLOWED_EXTENSIONS
+from src.ingestion.loader import ALLOWED_EXTENSIONS, UnsupportedFileTypeError, get_extractor
 from src.models.domain import StoredDocument
 from src.processing.chunking import chunk_document
-from src.processing.extractors.factory import UnsupportedFileTypeError, get_extractor
 from src.services.vector_store import VectorStoreService
 
 

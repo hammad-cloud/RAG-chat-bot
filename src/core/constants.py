@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".txt"}
-
 UNKNOWN_ANSWER = (
     "I could not find a relevant answer to this question in the provided documents."
 )

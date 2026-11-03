@@ -4,10 +4,13 @@ import fitz
 import pytest
 from docx import Document
 
-from src.processing.extractors.docx_extractor import DocxExtractor
-from src.processing.extractors.factory import UnsupportedFileTypeError, get_extractor
-from src.processing.extractors.pdf_extractor import PdfExtractor
-from src.processing.extractors.txt_extractor import TxtExtractor
+from src.ingestion.loader import (
+    DocxExtractor,
+    PdfExtractor,
+    TxtExtractor,
+    UnsupportedFileTypeError,
+    get_extractor,
+)
 
 
 def make_pdf(*pages: str) -> bytes:
