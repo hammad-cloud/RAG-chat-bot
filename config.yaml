@@ -1,0 +1,33 @@
+# Non-secret settings. Secrets (API keys, AUTH_TOKENS) go in .env, never here.
+# Any value can be overridden by an environment variable or .env (e.g. CHUNK_SIZE=500).
+
+# --- App / server ---
+app_name: RAG Chatbot API
+backend_host: 0.0.0.0
+backend_port: 8000
+cors_origins:
+  - http://localhost:8501
+
+# --- LLM ---
+llm_provider: gemini        # gemini | openai
+gemini_model: gemini-3.5-flash
+openai_model: gpt-4o-mini
+
+# --- Chunking ---
+chunk_size: 900             # characters per chunk
+chunk_overlap: 150
+
+# --- Retrieval ---
+retrieval_top_k: 4
+min_similarity_score: 0.05
+
+# --- Vector database (ChromaDB) ---
+chroma_dir: data/chroma     # relative to the project root
+collection_name: company_documents
+
+# --- Uploads ---
+upload_dir: uploads
+max_upload_mb: 20
+
+# --- Logging ---
+redact_secrets: true

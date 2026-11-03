@@ -1,4 +1,4 @@
-"""Backend configuration."""
+"""Settings: config.yaml for defaults, .env / environment variables for overrides and secrets."""
 
 from __future__ import annotations
 
@@ -6,7 +6,12 @@ import re
 from pathlib import Path
 
 from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    YamlConfigSettingsSource,
+)
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
@@ -15,8 +20,27 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=str(BASE_DIR / ".env"),
         env_file_encoding="utf-8",
+        yaml_file=str(BASE_DIR / "config.yaml"),
         extra="ignore",
     )
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        # Priority: environment > .env > config.yaml > defaults below.
+        return (
+            init_settings,
+            env_settings,
+            dotenv_settings,
+            YamlConfigSettingsSource(settings_cls),
+            file_secret_settings,
+        )
 
     app_name: str = "RAG Chatbot API"
     backend_host: str = "0.0.0.0"
@@ -57,6 +81,12 @@ class Settings(BaseSettings):
             if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", user_id):
                 raise ValueError(f"Invalid user id in AUTH_TOKENS: {user_id!r}")
         return tokens
+
+    @field_validator("upload_dir", "chroma_dir")
+    @classmethod
+    def _resolve_path(cls, path: Path) -> Path:
+        # Relative paths (e.g. from config.yaml) are relative to the project root, not the cwd.
+        return path if path.is_absolute() else BASE_DIR / path
 
     @field_validator("secret_patterns")
     @classmethod

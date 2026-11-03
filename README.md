@@ -28,7 +28,7 @@ Question ──► Similarity search (top 4) ──► Context + question ──
 - Switch between Gemini and OpenAI with one setting
 - Automatic fallback through newer Gemini Flash models if the configured one is unavailable
 - Clear error messages for missing or invalid API keys
-- Retrieval settings (chunk size, overlap, top-k, similarity threshold) configurable from `.env`
+- Retrieval settings (chunk size, overlap, top-k, similarity threshold) configurable in `config.yaml`
 
 ## Tech stack
 
@@ -138,7 +138,8 @@ the request. Enter your token in the frontend sidebar.
 
 ## Configuration
 
-All settings live in `.env` at the repo root:
+Non-secret settings (models, chunk size, top-k, DB paths) live in `config.yaml`. Secrets live in `.env`
+(copy `.env.example`). Any `config.yaml` value can be overridden by an environment variable or `.env`:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
