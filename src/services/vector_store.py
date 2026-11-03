@@ -6,16 +6,16 @@ from typing import Any
 from uuid import uuid4
 
 import chromadb
-from chromadb.utils import embedding_functions
 
 from src.core.config import settings
+from src.embeddings.embedder import get_embedding_function
 from src.models.domain import RetrievedChunk, StoredDocument, TextChunk
 
 
 class VectorStoreService:
     def __init__(self) -> None:
         self._client = chromadb.PersistentClient(path=str(settings.chroma_dir))
-        self._embedding_fn = embedding_functions.DefaultEmbeddingFunction()
+        self._embedding_fn = get_embedding_function()
         self._collection = self._client.get_or_create_collection(
             name=settings.collection_name,
             embedding_function=self._embedding_fn,
