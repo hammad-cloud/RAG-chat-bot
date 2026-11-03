@@ -1,4 +1,4 @@
-"""Detect and redact likely credentials in text that leaves the backend.
+"""Helpers: detect and redact likely credentials in text that leaves the backend.
 
 Rules are deliberately narrow (known token formats, or `key: value` assignments whose
 value looks like a real secret) so ordinary document text is left alone.
@@ -11,7 +11,7 @@ import re
 import traceback
 from functools import lru_cache
 
-from src.core.config import settings
+from src.utils.config import settings
 
 # Prefix-anchored token formats that practically never occur in normal prose.
 TOKEN_RULES: dict[str, str] = {

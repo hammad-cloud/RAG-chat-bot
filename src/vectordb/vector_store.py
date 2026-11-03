@@ -7,9 +7,9 @@ from uuid import uuid4
 
 import chromadb
 
-from src.core.config import settings
 from src.embeddings.embedder import get_embedding_function
-from src.models.domain import RetrievedChunk, StoredDocument, TextChunk
+from src.utils.config import settings
+from src.utils.models import RetrievedChunk, StoredDocument, TextChunk
 
 
 class VectorStoreService:

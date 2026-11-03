@@ -17,8 +17,8 @@ from main import app
 from scripts.assign_owner import assign_unowned
 from src.api import routes
 from src.api.dependencies import get_vector_store
-from src.core.config import settings
 from src.retrieval.retriever import ChatService
+from src.utils.config import settings
 
 FACT_A = "Project Falcon's launch code word is MANGO."
 FACT_B = "Project Heron's approved budget is 9,999 dinars."

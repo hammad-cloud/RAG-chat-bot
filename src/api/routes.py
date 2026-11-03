@@ -10,9 +10,9 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from src.api.auth import get_current_user
 from src.api.dependencies import get_chat_service, get_document_service
 from src.api.schemas import AskRequest, AskResponse, DocumentInfo, DocumentUploadResponse
-from src.core.config import settings
-from src.core.redaction import redact
 from src.ingestion.loader import UnsupportedFileTypeError
+from src.utils.config import settings
+from src.utils.helpers import redact
 
 logger = logging.getLogger(__name__)
 

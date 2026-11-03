@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-from src.core.config import settings
-from src.models.domain import ExtractedDocument, TextChunk
+from src.utils.config import settings
+from src.utils.models import ExtractedDocument, TextChunk
 
 
 def clean_text(text: str) -> str:

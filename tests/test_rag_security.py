@@ -19,10 +19,10 @@ from fastapi.testclient import TestClient
 
 from main import app
 from src.api.dependencies import get_vector_store
-from src.core.config import settings
 from src.llm.llm_client import LLMService
 from src.prompts.prompt_templates import SYSTEM_PROMPT, build_user_prompt
 from src.retrieval.retriever import ChatService
+from src.utils.config import settings
 
 CANARY = "ZEBRA-7731"  # appears in an answer only if the model obeyed the PDF
 FAKE_API_KEY = "AIza" + "FAKE0TEST0KEY0" + "x" * 21

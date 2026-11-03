@@ -1,4 +1,4 @@
-from src.models.domain import TextChunk
+from src.utils.models import TextChunk
 from src.vectordb.vector_store import VectorStoreService
 
 

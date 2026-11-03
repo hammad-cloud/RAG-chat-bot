@@ -15,7 +15,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 
-from src.core.config import settings
+from src.utils.config import settings
 from src.vectordb.vector_store import VectorStoreService
 
 

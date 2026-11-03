@@ -9,7 +9,7 @@ from pathlib import Path
 import fitz
 from docx import Document
 
-from src.models.domain import ExtractedDocument
+from src.utils.models import ExtractedDocument
 
 ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".txt"}
 

@@ -12,11 +12,11 @@ from fastapi.testclient import TestClient
 
 from main import app
 from src.api import routes
-from src.core import redaction
-from src.core.config import settings
-from src.core.redaction import redact
-from src.models.domain import RetrievedChunk
 from src.retrieval.retriever import ChatService
+from src.utils import helpers as redaction
+from src.utils.config import settings
+from src.utils.helpers import redact
+from src.utils.models import RetrievedChunk
 
 FAKE = {
     "google_api_key": "AIza" + "FAKE0TEST0KEY0" + "x" * 21,

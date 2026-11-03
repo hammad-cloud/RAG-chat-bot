@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from src.core.config import settings
 from src.prompts.prompt_templates import SYSTEM_PROMPT, UNKNOWN_ANSWER, build_user_prompt
+from src.utils.config import settings
 
 # Prefer configured model, then newer Flash aliases for new Gemini API keys.
 GEMINI_MODEL_FALLBACKS = (

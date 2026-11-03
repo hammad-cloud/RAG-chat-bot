@@ -9,8 +9,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes import chat_router, documents_router, health_router
-from src.core.config import settings
-from src.core.redaction import install_log_redaction
+from src.utils.config import settings
+from src.utils.helpers import install_log_redaction
 
 install_log_redaction()
 

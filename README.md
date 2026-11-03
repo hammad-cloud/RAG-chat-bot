@@ -157,7 +157,7 @@ Never commit your `.env` files. API keys stay on the backend; the frontend only 
 
 ### Credential redaction
 
-`src/core/redaction.py` replaces likely credentials with `[REDACTED:<rule>]` before
+`src/utils/helpers.py` replaces likely credentials with `[REDACTED:<rule>]` before
 document text reaches the LLM, before answers and error messages reach the user, and in every
 log line. It matches the backend's own configured keys exactly, known token formats (Google,
 OpenAI, AWS, GitHub, Slack, Stripe, JWT, private keys, bearer tokens, `user:pass@` URLs), and

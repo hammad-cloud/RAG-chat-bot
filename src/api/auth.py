@@ -9,7 +9,7 @@ import hmac
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from src.core.config import settings
+from src.utils.config import settings
 
 _bearer = HTTPBearer(auto_error=False)
 

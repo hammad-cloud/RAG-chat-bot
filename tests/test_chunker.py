@@ -1,7 +1,7 @@
 import pytest
 
 from src.chunking.chunker import chunk_document, clean_text
-from src.models.domain import ExtractedDocument
+from src.utils.models import ExtractedDocument
 
 
 def test_clean_text_collapses_whitespace_and_nulls():
